@@ -1,0 +1,165 @@
+
+- **Title: Working example 3**
+- **Output: html_document**
+- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+source("Functions.R")
+library(ggplot2)
+library(car)
+library(MASS)
+```
+
+
+## Working example 3
+
+## In this example we simulate 5 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
+
+- **data reading**
+```{r}
+dat <- read.table("WExample3.csv", header=TRUE, sep=";", dec=",")
+names(dat) #
+```
+
+- **do not forget to declare the categorical variables as factors**
+```{r}
+dat$Sex <- as.factor(dat$Sex)
+dat$Diagnostic <- as.factor(dat$Diagnostic)
+```
+
+- **Step 1: Order  the PRSs**
+```{r}
+out <- orderR2(dat, yname="Trait", prsname = "PRS.")
+head(out)
+write.csv2(out,file="WExample1_Ordered_PRS.csv")
+```
+
+- **Step 1: Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean**
+```{r}
+out <- data.frame(out) 
+nPRS <- dim(out)[1]
+select <- grep("Model", names(out), value=FALSE)
+out$effect <- out$Sum
+sds <- apply(out[, select], 1, sd)
+out$lower <- out$effect - sds
+out$upper <- out$effect + sds
+out$rank <- nPRS:1
+
+n <- dim(out)[1]
+ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
+  geom_point() +
+  geom_errorbarh(height=.1) +
+  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
+  labs(title='', x='Sum R^2', y = 'PRS') +
+  geom_vline(xintercept=mean(out$effect), color='black', linetype='dashed') +
+  geom_vline(xintercept=median(out$effect), color='blue', linetype='dashed') +
+  theme_minimal()
+
+```
+
+- **Repeat the plot with only de PRS with $S_{R^2}$ larger then the median. Lines: in red and solid the 95% percentile; in red and dashed the 90%, 85%, 80% percentiles**
+```{r}
+sel <- out$Sum > median(out$effect)
+ggplot(data=out[sel,], aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
+  geom_point() +
+  geom_errorbarh(height=.1) +
+  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
+  labs(title='', x='Sum R^2', y = 'PRS') +
+  geom_vline(xintercept=quantile(out$Sum, prob=0.95), color='red', linetype='solid') +
+  geom_vline(xintercept=quantile(out$Sum, prob=c(0.80, 0.85, 0.90)), color='red', linetype='dashed') +
+  theme_minimal()
+```
+
+- **Create files with PRS with the sum of $R^2$ greater then the 95%, 90%, 85% and 80% percentile**
+```{r}
+sel_95 <- out$Sum > quantile(out$Sum, prob=0.95)
+write.csv2(out[sel_95,-9], file="WExample1_precentil_95.csv")
+sel_90 <- out$Sum > quantile(out$Sum, prob=0.90)
+write.csv2(out[sel_90,-9], file="WExample1_precentil_90.csv")
+sel_85 <- out$Sum > quantile(out$Sum, prob=0.85)
+write.csv2(out[sel_85,-9], file="WExample1_precentil_85.csv")
+sel_80 <- out$Sum > quantile(out$Sum, prob=0.80)
+write.csv2(out[sel_80,-9], file="WExample1_precentil_80.csv")
+
+```
+
+## According to the obtained results, first PRS.1 is selected to analyze its association with the Trait
+
+- **Step 2.1: Plots to check the possible interactions**
+```{r}
+ggplot(dat, aes(x=PRS.1, y=Trait)) +
+  geom_point() +
+  geom_smooth(method=lm, se=FALSE)+
+  facet_grid(Sex ~ Diagnostic, labeller=label_both)
+```
+## The plots suggest that the interaction between the PRS.1 and sex is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS*Sex + PC1 +PC2$
+
+- **Step2.2** Do parametric assumptions for the selected FM hold?
+```{r}
+#model
+FM <- lm(Trait ~ PRS.1*Sex + Diagnostic + Age + PC1 + PC2, data=dat)
+#qq-plot for normality 
+plot(FM,2)   
+```
+
+```{r}
+#Saphiro-Wilk test
+shapiro.test(FM$residuals)
+```
+
+```{r}
+#plot for variances
+d <- fortify(FM)
+ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yintercept=0, col="red")+
+  facet_wrap(.~Sex)
+```
+
+```{r}
+#Levene's test
+leveneTest(.stdresid ~ Sex, data=d)
+```
+
+## It seems homocedasticity does no hold. Thus, we have two approaches to assess the possible association with PRS.1 and the Trait: try a Box-Cox transformation (**Step 4.2.1**) or perform a weighted permutation test (**Step 4.2.2**)
+
+- **Step 4.2.1: Try a Box-Cox transformation of the dependent variable:**
+```{r}
+b <- boxcox(FM)
+```
+```{r}
+# Exact lambda
+lambda <- b$x[which.max(b$y)]
+lambda
+```
+```{r}
+dat$newTrait <- (dat$Trait ^ lambda - 1) / lambda
+FM <- lm(newTrait ~ PRS.1*Sex + Diagnostic + Age + PC1 + PC2, data=dat)
+```
+```{r}
+#Shapiro-Wilk test
+shapiro.test(FM$residuals)
+```
+
+```{r}
+#Levene's test
+d <- fortify(FM)
+leveneTest(.stdresid ~ Sex, data=d)
+```
+ 
+##In this case, the suggested Box-Cox transformation with λ = 0.667 does not solve the heteroscedasticity problem
+
+- **Step 4.2.1: Weighted permutation test**
+```{r}
+NM <- lm(Trait ~ Sex + Diagnostic + Age + PC1+PC2, data=dat)
+FM <- lm(Trait ~ PRS.1*Sex + Diagnostic + Age + PC1+PC2, data=dat)
+outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165,  weights=TRUE)
+outperm
+```
+
+- **Last step: We move to the next PRS**
+

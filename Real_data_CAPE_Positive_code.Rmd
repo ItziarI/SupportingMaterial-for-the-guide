@@ -1,0 +1,136 @@
+
+- **Title: Real data CAPE Positive**
+- **Output: html_document**
+- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a Trait**
+- **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+source("Functions.R")
+library(ggplot2)
+library(car)
+library(multcomp)
+library(lattice)
+```
+
+
+## Real data CAPE Positive as binary Trait
+
+- **In this real data set there are 106 PRS, and a binary CAPE_Positive (CAPE_Positive), with gender, age, and two Principal Components as covariates.** 
+
+- **data reading**
+```{r}
+dat <- read.table("Real_data.csv", header=TRUE, sep=";", dec=",")
+names(dat) #
+```
+
+- **do not forget to declare the categorical variables as factors**
+```{r}
+dat$Sex <- as.factor(dat$Sex)
+dat$CAPE_Positive <- as.factor(dat$CAPE_Positive)
+```
+
+- **Step 1: Order  the PRSs according to the sum of  the Tjur's coefficients of discrimination. If Nagelkerke's R^2 is prefered, set statistic="PseudoR2" in function orderBin()**
+```{r}
+# Order the PRSs
+out <- orderBin(dat, yname="CAPE_Positive", prsname = "PRS.", statistic = "D")
+head(out)
+mainfilename <- "Real_data_CAPE_Positive"
+filename <- paste0(mainfilename, "_Ordered_PRS.csv")
+write.csv2(out,file=filename)
+```
+
+- **Step 1: Plot the sum of discrimination coefficients  $D$. Lines: in blue the median; in black the mean**
+```{r}
+out <- data.frame(out) 
+n <- dim(out)[1]
+select <- grep("Model", names(out), value=FALSE)
+out$effect <- out$Sum
+sds <- apply(out[, select], 1, sd)
+out$lower <- out$effect - sds
+out$upper <- out$effect + sds
+out$rank <- n:1
+
+
+ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
+  geom_point() +
+  geom_errorbarh(height=.1) +
+  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
+  labs(title='', x='Sum of D', y = 'PRS') +
+  geom_vline(xintercept=mean(out$effect), color='black', linetype='dashed') +
+  geom_vline(xintercept=median(out$effect), color='blue', linetype='dashed') +
+  theme_minimal()
+
+```
+
+- **According to the obtained results, first PRS.15 is selected to analyse its association with the CAPE_Positive.**
+
+- **Step 2.1: Plots to check the possible interactions**
+```{r}
+# First candidate PRS.15
+# Plot it
+M <- glm(CAPE_Positive ~ PRS.15*Sex + Age + PC1 + PC2, data=dat, family=binomial())
+pre <- M$fitted.values #predict(M,type='response')   
+xyplot(log(pre/(pre+1))~PRS.15|Sex, data=dat,  type=c("p", "r"))
+```
+
+- **The plots suggest that the interaction between the PRS.15 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $CAPE_Positive \sim PRS + Sex  + PRS*Sex + Age + PC1 +PC2$**
+
+- **Step2.2: Is there evidence of overdispersion in the selected FM model?**
+```{r}
+#model
+FM <- glm(CAPE_Positive ~ Sex + PRS.15*Sex + Age + PC1 + PC2, data=dat, family=binomial())
+#Residual Deviance
+FM$deviance
+# Ratio 
+FM$deviance/FM$df.residual
+
+```
+
+- **Since this ratio is close to 1, there is not evidence of overdispersion**
+
+```{r}
+#With chi-squared test
+FM.od <- glm(CAPE_Positive ~ Sex + PRS.15*Sex + Age + PC1 + PC2, data=dat, family=quasibinomial())
+pchisq(summary(FM.od)$dispersion * FM$df.residual,
+       FM$df.residual, lower = F)
+```
+
+- **With this p-value = 0.2651 we conclude that there is not evedence of overdispersion**
+
+- **Step 3: Check the coefficients of the model**
+```{r}
+summary(FM)
+```
+- **The results do indicate a clear association between PRS.15 and the Trait**
+
+\begin{itemize}
+    \item $\widehat{log(p/1-p)} = 0.055 + 0.746\times PRS.15 - 0.118\times Age + 1.951\times PC1 + 2.867\times PC2$ if Sex = 0.
+    \item $\widehat{log(p/1-p)} = (0.055 + 0.139) + (0.746 - 0.749)\times PRS.15 - 0.118\times Age + 1.951\times PC1 + 2.867\times PC2$ if Sex = 1.
+\end{itemize}
+
+
+- **Step 3: Check whether the respective PRS coefficients under each group are significant or not**
+```{r}
+summary(glht(FM, "PRS.15 = 0"))
+summary(glht(FM, "PRS.15  + Sex1:PRS.15 = 0"))
+```
+
+- **That means that for those with Sex=1, it seems that the PRS.15 is not related to the Trait with odds = exp(-0.002) = 0.991, but for those with Sex = 0 the model indicates that the coefficient of PRS.15 is 0.7463, so the odds increase exp(0.7463) = 2.109 for an incremental of one unit in PRS.15 with a p-value=0.0101**
+
+
+- **Step 3: It is possible to compute a permutation test to assess whether the increase in the coefficient of determination $D$ is significative**
+```{r}
+# Null model
+NM <- glm(CAPE_Positive ~  Sex + Age + PC1 + PC2, data=dat, family=binomial() )
+permtest <- dD(NM, FM, seed=1236)
+permtest
+```
+- **In this particular case, it can be seen that the coefficient of discrimination of the FM model is 0.05 units bigger than the corresponding to the *Null Model* NM, and it is statistically significant.**
+
+- **Last step: We move to the next PRS**
+

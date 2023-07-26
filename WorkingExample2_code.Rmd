@@ -1,0 +1,178 @@
+
+- **Title: Working example 2**
+- **Output: html_document**
+- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+source("Functions.R")
+library(ggplot2)
+library(car)
+library(multcomp)
+```
+
+## Working example 2
+
+## In this example we simulate 10 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
+
+- **data reading**
+```{r}
+dat <- read.table("WExample2.csv", header=TRUE, sep=";", dec=",")
+names(dat) #
+```
+
+- **do not forget to declare the categorical variables as factors**
+```{r}
+dat$Sex <- as.factor(dat$Sex)
+dat$Diagnostic <- as.factor(dat$Diagnostic)
+```
+
+- **Step 1: Order  the PRSs**
+```{r}
+out <- orderR2(dat, yname="Trait", prsname = "PRS.")
+head(out)
+mainfilename <- "WExample2"
+filename <- paste0(mainfilename, "_Ordered_PRS.csv")
+write.csv2(out,file=filename)
+```
+
+- **Step 1: Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean**
+```{r}
+out <- data.frame(out) 
+n <- dim(out)[1]
+select <- grep("Model", names(out), value=FALSE)
+out$effect <- out$Sum
+sds <- apply(out[, select], 1, sd)
+out$lower <- out$effect - sds
+out$upper <- out$effect + sds
+out$rank <- n:1
+
+
+ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
+  geom_point() +
+  geom_errorbarh(height=.1) +
+  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
+  labs(title='', x='Sum R^2', y = 'PRS') +
+  geom_vline(xintercept=mean(out$effect), color='black', linetype='dashed') +
+  geom_vline(xintercept=median(out$effect), color='blue', linetype='dashed') +
+  theme_minimal()
+
+```
+
+- **Repeat the plot with only de PRS with $S_{R^2}$ larger then the median. Lines: in red and solid the 95% percentile; in red and dashed the 90%, 85%, 80% percentiles**
+```{r}
+sel <- out$Sum > median(out$effect)
+ggplot(data=out[sel,], aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
+  geom_point() +
+  geom_errorbarh(height=.1) +
+  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
+  labs(title='', x='Sum R^2', y = 'PRS') +
+  geom_vline(xintercept=quantile(out$Sum, prob=0.95), color='red', linetype='solid') +
+  geom_vline(xintercept=quantile(out$Sum, prob=c(0.80, 0.85, 0.90)), color='red', linetype='dashed') +
+  theme_minimal()
+```
+
+- **Create files with PRS with the sum of $R^2$ greater then the 95%, 90%, 85% and 80% percentile**
+```{r}
+sel_95 <- out$Sum > quantile(out$Sum, prob=0.95)
+write.csv2(out[sel_95,-9], file=paste0(mainfilename, "_Percentile_95.csv"))
+sel_90 <- out$Sum > quantile(out$Sum, prob=0.90)
+write.csv2(out[sel_90,-9], file=paste0(mainfilename, "_Percentile_90.csv"))
+sel_85 <- out$Sum > quantile(out$Sum, prob=0.85)
+write.csv2(out[sel_85,-9], file=paste0(mainfilename, "_Percentile_85.csv"))
+sel_80 <- out$Sum > quantile(out$Sum, prob=0.80)
+write.csv2(out[sel_80,-9], file=paste0(mainfilename, "_Percentile_80.csv"))
+```
+
+## According to the obtained results, first PRS.5 is selected to analyse its association with the Trait.
+
+- **Step 2.1: Plots to check the possible interactions**
+```{r}
+ggplot(dat, aes(x=PRS.5, y=Trait)) +
+  geom_point() +
+  geom_smooth(method=lm, se=FALSE)+
+  facet_grid(Sex ~ Diagnostic, labeller=label_both)
+# Candidate FM Trait ~ PRS + Sex + Diagnostic + PRS + PRS*Diagnostic + PC1 +PC2
+```
+
+## The plots suggest that the interaction between the PRS.5 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + Sex + PRS*Diagnostic + PC1 +PC2$
+
+- **Step2.2: Do parametric assumptions for the selected FM hold?**
+```{r}
+#model
+FM <- lm(Trait ~ PRS.5*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
+#qq-plot for normality 
+plot(FM,2)   
+```
+
+## Lack of normality of residuals is suggested
+
+```{r}
+#Shapiro-Wilk test
+shapiro.test(FM$residuals)
+```
+
+```{r}
+#plot for variances
+d <- fortify(FM)
+ggplot(d,aes(x=.fitted, y=.stdresid, colour=Diagnostic)) + geom_point() + geom_hline(yintercept=0, col="red")+
+  facet_wrap(.~Diagnostic)
+```
+
+```{r}
+#Levene's test
+leveneTest(.stdresid ~ Diagnostic, data=d)
+```
+
+## It seems that there is lack of normality of residual but linearity and homocedasticity assumptions hold. Thus, we have two approaches to assess the possible association with PRS.5 and the Trait: try a transformation (**Step 4.1.1**) or perform a permutation test (**Step 4.1.2**)
+
+- **Step 4.1.1: Try a transformation of the dependent variable:**
+```{r}
+dat$logTrait <- log(dat$Trait)
+FM <- lm(logTrait ~ PRS.5*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
+#qq-plot for normality 
+plot(FM,2)
+```
+```{r}
+#Shapiro-Wilk test
+shapiro.test(FM$residuals)
+```
+
+## Since it is suggested the transformation offered a solution for the lack of normality, the model we build is given by:
+
+```{r}
+summary(FM)
+```
+
+## The results show that PRS.5 is related with the log(Trait) in the following way:
+
+\begin{itemize}
+    \item $\widehat{log(Trait)} = 2.585 + 0.00089\times PRS.5 + 0.041\times Sex - 0.0006\times Age + 0.197\times PC1 - 0.0596\times PC2$ if Diagnostic = 0.
+    \item $\widehat{log(Trait)} = (2.585-20.052) + (0.00089-0.26068)\times PRS.5 +  0.041\times Sex + - 0.0006\times Age  + 0.197\times PC1 - 0.0596\times PC2$ if Diagnostic = 1.
+  \end{itemize}
+
+- **Step 3: Check whether the respective PRS coefficients under each group are significant or not**
+```{r}
+summary(glht(FM, "PRS.5 = 0"))
+summary(glht(FM, "PRS.5  + PRS.5:Diagnostic1 = 0"))
+```
+
+## That means that for Diagnostic 1, the association is negative (coeff = -0.25979, $p$-value= 0.004487 (*)); for Diagnostic 0, there is not association (coeff = 0.00089, $p$-value=0.9868). Given this transformation, the increase of one unit in PRS.5, makes the ration $\widehat{log(Trait)}|PRS.5 = 1/\widehat{log(Trait)|PRS.5=0} = exp(-0.25979)=0.771 < 1$, thus, gives a mean decrease of about 22.9\%
+
+
+- **Step 4.1.2: Perform a permutation test to assess the association**
+```{r}
+NM <- lm(Trait ~ Diagnostic + Sex + Age + PC1 + PC2, data=dat)
+FM <- lm(Trait ~ PRS.5*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
+outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165)
+outperm
+```
+## We observe an increase of 0.108 in the coefficient of determination when the PRS.5 is included in the model and the permutation test indicates it is significant.
+
+- **Last step: We move to the next PRS**
+
