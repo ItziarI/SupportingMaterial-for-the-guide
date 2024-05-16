@@ -1,4 +1,4 @@
-#A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples
+# A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples
 
 Supported Information of the tutorial paper *A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples* can be reproduced with the provided material in the repository
 
