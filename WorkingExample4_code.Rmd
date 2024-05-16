@@ -1,7 +1,7 @@
 
 - **Title: Working example 4**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -67,7 +67,7 @@ ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
 
 ```
 
-## According to the obtained results, first PRS.7 is selected to analyse its association with the Trait.
+### According to the obtained results, first PRS.7 is selected to analyse its association with the Trait.
 
 - **Step 2.1: Plots to check the possible interactions**
 ```{r}
@@ -82,7 +82,7 @@ ggplot(dat, aes(x=PRS.7, y=log(pre/(pre+1)))) +
 # Candidate FM Trait ~ PRS + Sex + Diagnostic + PRS*Diagnostic + C1 +C2
 ```
 
-##The plots suggest that the interaction between the PRS.7 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS*Diagnostic + Age + PC1 +PC2$
+### The plots suggest that the interaction between the PRS.7 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS \cdot Diagnostic + Age + PC1 +PC2$
 
 - **Step2.2: Is there evidence of overdispersion in the selected FM model?**
 ```{r}
@@ -95,7 +95,7 @@ FM$deviance/FM$df.residual
 
 ```
 
-##Since this ratio is close to 1, there is not evidence of overdispersion
+### Since this ratio is close to 1, there is not evidence of overdispersion
 
 ```{r}
 #With chi-squared test
@@ -104,14 +104,14 @@ pchisq(summary(FM.od)$dispersion * FM$df.residual,
        FM$df.residual, lower = F)
 ```
 
-## With this p-value = 0.3389 we conclude that there is not evedence of overdispersion
+### With this p-value = 0.3389 we conclude that there is not evedence of overdispersion
 
 - **Step 3: Check the coefficients of the model**
 ```{r}
 summary(FM)
 ```
 
-## The results do not indicate a clear association between PRS.7 and the Trait
+### The results do not indicate a clear association between PRS.7 and the Trait
 
 \begin{itemize}
     \item $\widehat{log(p/1-p)} = 1.953 + 0.008\times PRS.7 + 0.446\times Sex + 0.044\times Age - 5.566\times PC1 + 3.785\times PC2$ if Diagnostic = 0.
@@ -124,7 +124,7 @@ summary(glht(FM, "PRS.7 = 0"))
 summary(glht(FM, "PRS.7  + PRS.7:Diagnostic1 = 0"))
 ```
 
-## That means that for those with Diagnostic=0, it seems that the PRS.7 is not related to the Trait with odds = exp(0.0082) = 1.008, but for those with Diagnosis =1 the model indicates that the coefficient of PRS.7 is 0.0082 + 0.162 = 0.1702, so the odds increase exp(0.1702) = 1.186 for an incremental of one unit in PRS.7 with a p-value=0.0439
+### That means that for those with Diagnostic=0, it seems that the PRS.7 is not related to the Trait with odds = exp(0.0082) = 1.008, but for those with Diagnosis =1 the model indicates that the coefficient of PRS.7 is 0.0082 + 0.162 = 0.1702, so the odds increase exp(0.1702) = 1.186 for an incremental of one unit in PRS.7 with a p-value=0.0439
 
 
 - **Step 3: It is possible to compute a permutation test to assess whether the increase in the coefficient of determination $D$ is significative**
@@ -134,7 +134,7 @@ NM <- glm(Trait ~  Sex + Diagnostic + Age + PC1 + PC2, data=dat, family=binomial
 permtest <- dD(NM, FM, seed=1236)
 permtest
 ```
-## In this particular case, it can be seen that the coefficient of discrimination of the FM model is 0.07 units bigger than the corresponding to the *Null Model* NM, but it is not statistically significant.
+### In this particular case, it can be seen that the coefficient of discrimination of the FM model is 0.07 units bigger than the corresponding to the *Null Model* NM, but it is not statistically significant.
 
 - **Last step: We move to the next PRS**
 

@@ -1,7 +1,7 @@
 
 - **Title: Working example 1**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -19,7 +19,7 @@ library(multcomp)
 
 ## Working example 1
 
-## In this example we simulate 9 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates
+### In this example we simulate 9 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates
 
 - **data reading**
 ```{r}
@@ -89,7 +89,7 @@ write.csv2(out[sel_80,-9], file="WExample1_precentil_80.csv")
 
 ```
 
-## According to the obtained results, first, PRS.4 is selected to analyse its possible association with the Trait
+### According to the obtained results, first, PRS.4 is selected to analyse its possible association with the Trait
 
 - **Step 2.1: Plots to check the possible interactions**
 ```{r}
@@ -101,7 +101,7 @@ ggplot(dat, aes(x=PRS.4, y=Trait)) +
   facet_grid(Sex ~ Diagnostic, labeller=label_both)
 ```
 
-## The plots suggest that the interaction between the PRS.4 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS*Diagnostic + PC1 +PC2$
+### The plots suggest that the interaction between the PRS.4 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Diagnostic + PC1 +PC2$
 
 
 - **Step2.2: Do parametric assumptions for the selected FM hold?**
@@ -129,13 +129,13 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Diagnostic)) + geom_point() + geom_h
 leveneTest(.stdresid ~ Diagnostic, data=d)
 ```
 
-## It seems all assumptions fulfill, therefore, we move to *Step 3*
+### It seems all assumptions fulfill, therefore, we move to *Step 3*
 
 - **Step 3: Check the coefficients of the model**
 ```{r}
 summary(FM)
 ```
-## The results show that PRS.4 is related with the Trait in the following way:
+### The results show that PRS.4 is related with the Trait in the following way:
 
 \begin{itemize}
     \itemif Diagnostic = 0, $\widehat{Trait} = 14.816 + -1.041\, PRS.4 + 1.3\,Sex -0.071\,Age + 0.927\,PC1 + 8.033\,PC2$ 
@@ -150,7 +150,7 @@ summary(glht(FM, "PRS.4 = 0"))
 summary(glht(FM, "PRS.4  + PRS.4:Diagnostic1 = 0"))
 ```
 
-## That means that for Diagnostic group 0 there is no relevant association (coeff = -1.041), but for Diagnostic group 1, the association is strong, positive (coeff = 13.980), and significant (p-value = 0.014)
+### That means that for Diagnostic group 0 there is no relevant association (coeff = -1.041), but for Diagnostic group 1, the association is strong, positive (coeff = 13.980), and significant (p-value = 0.014)
 
 
 - **Last step: We move to the next PRS**

@@ -1,7 +1,7 @@
 
 - **Title: Real data CAPE Negative**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a Trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -21,13 +21,14 @@ library(multcomp)
 
 - **In this real data set there are 106 PRS, and a continuous Trait (CAPE_Negative), with gender, age, and two Principal Components as covariates.**
 
-- **data reading**
+- **Data reading**
 ```{r}
 dat <- read.table("Real_data_Negative.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
+dat <- dat[, -1]
 ```
-- **Check that all variables you are interested are read and that there not other variables you do not need**
-- **do not forget to declare the categorical variables as factors**
+- **Check that all variables you are interested in are properly read and that there are not other variables you do not need**
+- **Do not forget to declare the categorical variables as factors**
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
 ```

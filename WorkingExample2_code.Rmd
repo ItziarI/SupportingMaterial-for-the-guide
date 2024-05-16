@@ -1,7 +1,7 @@
 
 - **Title: Working example 2**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -18,7 +18,7 @@ library(multcomp)
 
 ## Working example 2
 
-## In this example we simulate 10 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
+### In this example we simulate 10 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
 
 - **data reading**
 ```{r}
@@ -89,7 +89,7 @@ sel_80 <- out$Sum > quantile(out$Sum, prob=0.80)
 write.csv2(out[sel_80,-9], file=paste0(mainfilename, "_Percentile_80.csv"))
 ```
 
-## According to the obtained results, first PRS.5 is selected to analyse its association with the Trait.
+### According to the obtained results, first PRS.5 is selected to analyse its association with the Trait.
 
 - **Step 2.1: Plots to check the possible interactions**
 ```{r}
@@ -100,7 +100,7 @@ ggplot(dat, aes(x=PRS.5, y=Trait)) +
 # Candidate FM Trait ~ PRS + Sex + Diagnostic + PRS + PRS*Diagnostic + PC1 +PC2
 ```
 
-## The plots suggest that the interaction between the PRS.5 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + Sex + PRS*Diagnostic + PC1 +PC2$
+### The plots suggest that the interaction between the PRS.5 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + Sex + PRS \cdot Diagnostic + PC1 +PC2$
 
 - **Step2.2: Do parametric assumptions for the selected FM hold?**
 ```{r}
@@ -110,7 +110,7 @@ FM <- lm(Trait ~ PRS.5*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
 plot(FM,2)   
 ```
 
-## Lack of normality of residuals is suggested
+### Lack of normality of residuals is suggested
 
 ```{r}
 #Shapiro-Wilk test
@@ -129,7 +129,7 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Diagnostic)) + geom_point() + geom_h
 leveneTest(.stdresid ~ Diagnostic, data=d)
 ```
 
-## It seems that there is lack of normality of residual but linearity and homocedasticity assumptions hold. Thus, we have two approaches to assess the possible association with PRS.5 and the Trait: try a transformation (**Step 4.1.1**) or perform a permutation test (**Step 4.1.2**)
+### It seems that there is lack of normality of residual but linearity and homocedasticity assumptions hold. Thus, we have two approaches to assess the possible association with PRS.5 and the Trait: try a transformation (**Step 4.1.1**) or perform a permutation test (**Step 4.1.2**)
 
 - **Step 4.1.1: Try a transformation of the dependent variable:**
 ```{r}
@@ -143,13 +143,13 @@ plot(FM,2)
 shapiro.test(FM$residuals)
 ```
 
-## Since it is suggested the transformation offered a solution for the lack of normality, the model we build is given by:
+### Since it is suggested the transformation offered a solution for the lack of normality, the model we build is given by:
 
 ```{r}
 summary(FM)
 ```
 
-## The results show that PRS.5 is related with the log(Trait) in the following way:
+### The results show that PRS.5 is related with the log(Trait) in the following way:
 
 \begin{itemize}
     \item $\widehat{log(Trait)} = 2.585 + 0.00089\times PRS.5 + 0.041\times Sex - 0.0006\times Age + 0.197\times PC1 - 0.0596\times PC2$ if Diagnostic = 0.
@@ -162,7 +162,7 @@ summary(glht(FM, "PRS.5 = 0"))
 summary(glht(FM, "PRS.5  + PRS.5:Diagnostic1 = 0"))
 ```
 
-## That means that for Diagnostic 1, the association is negative (coeff = -0.25979, $p$-value= 0.004487 (*)); for Diagnostic 0, there is not association (coeff = 0.00089, $p$-value=0.9868). Given this transformation, the increase of one unit in PRS.5, makes the ration $\widehat{log(Trait)}|PRS.5 = 1/\widehat{log(Trait)|PRS.5=0} = exp(-0.25979)=0.771 < 1$, thus, gives a mean decrease of about 22.9\%
+### That means that for Diagnostic 1, the association is negative (coeff = -0.25979, $p$-value= 0.004487 (*)); for Diagnostic 0, there is not association (coeff = 0.00089, $p$-value=0.9868). Given this transformation, the increase of one unit in PRS.5, makes the ration $\widehat{log(Trait)}|PRS.5 = 1/\widehat{log(Trait)|PRS.5=0} = exp(-0.25979)=0.771 < 1$, thus, gives a mean decrease of about 22.9\%
 
 
 - **Step 4.1.2: Perform a permutation test to assess the association**
@@ -172,7 +172,7 @@ FM <- lm(Trait ~ PRS.5*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
 outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165)
 outperm
 ```
-## We observe an increase of 0.108 in the coefficient of determination when the PRS.5 is included in the model and the permutation test indicates it is significant.
+### We observe an increase of 0.108 in the coefficient of determination when the PRS.5 is included in the model and the permutation test indicates it is significant.
 
 - **Last step: We move to the next PRS**
 

@@ -1,7 +1,7 @@
 
 - **Title: Real data CAPE Positive**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a Trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -22,13 +22,14 @@ library(lattice)
 
 - **In this real data set there are 106 PRS, and a binary CAPE_Positive (CAPE_Positive), with gender, age, and two Principal Components as covariates.** 
 
-- **data reading**
+- **Data reading**
 ```{r}
 dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
+dat <- dat[, -1]
 ```
-- **Check that all variables you are interested are read and that there not other variables you do not need**
-- **do not forget to declare the categorical variables as factors**
+- **Check that all variables you are interested in are properly read and that there are not other variables you do not need**
+- **Do not forget to declare the categorical variables as factors**
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
 dat$CAPE_Positive <- as.factor(dat$CAPE_Positive)
@@ -78,7 +79,7 @@ pre <- M$fitted.values #predict(M,type='response')
 xyplot(log(pre/(pre+1))~PRS.15|Sex, data=dat,  type=c("p", "r"))
 ```
 
-- **The plots suggest that the interaction between the PRS.15 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $CAPE_Positive \sim PRS + Sex  + PRS*Sex + Age + PC1 +PC2$**
+- **The plots suggest that the interaction between the PRS.15 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $CAPE_Positive \sim PRS + Sex  + PRS\cdot Sex + Age + PC1 +PC2$**
 
 - **Step2.2: Is there evidence of overdispersion in the selected FM model?**
 ```{r}

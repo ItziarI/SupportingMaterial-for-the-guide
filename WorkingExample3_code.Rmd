@@ -1,7 +1,7 @@
 
 - **Title: Working example 3**
 - **Output: html_document**
-- **Reference: Tutorial: a guide to test evidence of association between a Polygenic Risk Score and a trait**
+- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
 
 
@@ -19,7 +19,7 @@ library(MASS)
 
 ## Working example 3
 
-## In this example we simulate 5 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
+### In this example we simulate 5 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates. 
 
 - **data reading**
 ```{r}
@@ -89,7 +89,7 @@ write.csv2(out[sel_80,-9], file="WExample1_precentil_80.csv")
 
 ```
 
-## According to the obtained results, first PRS.1 is selected to analyze its association with the Trait
+### According to the obtained results, first PRS.1 is selected to analyze its association with the Trait
 
 - **Step 2.1: Plots to check the possible interactions**
 ```{r}
@@ -98,7 +98,7 @@ ggplot(dat, aes(x=PRS.1, y=Trait)) +
   geom_smooth(method=lm, se=FALSE)+
   facet_grid(Sex ~ Diagnostic, labeller=label_both)
 ```
-## The plots suggest that the interaction between the PRS.1 and sex is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS*Sex + PC1 +PC2$
+### The plots suggest that the interaction between the PRS.1 and sex is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Sex + PC1 +PC2$
 
 - **Step2.2** Do parametric assumptions for the selected FM hold?
 ```{r}
@@ -125,7 +125,7 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yi
 leveneTest(.stdresid ~ Sex, data=d)
 ```
 
-## It seems homocedasticity does no hold. Thus, we have two approaches to assess the possible association with PRS.1 and the Trait: try a Box-Cox transformation (**Step 4.2.1**) or perform a weighted permutation test (**Step 4.2.2**)
+### It seems homocedasticity does no hold. Thus, we have two approaches to assess the possible association with PRS.1 and the Trait: try a Box-Cox transformation (**Step 4.2.1**) or perform a weighted permutation test (**Step 4.2.2**)
 
 - **Step 4.2.1: Try a Box-Cox transformation of the dependent variable:**
 ```{r}
@@ -151,7 +151,7 @@ d <- fortify(FM)
 leveneTest(.stdresid ~ Sex, data=d)
 ```
  
-##In this case, the suggested Box-Cox transformation with λ = 0.667 does not solve the heteroscedasticity problem
+### In this case, the suggested Box-Cox transformation with λ = 0.667 does not solve the heteroscedasticity problem
 
 - **Step 4.2.1: Weighted permutation test**
 ```{r}
