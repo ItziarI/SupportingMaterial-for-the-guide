@@ -24,7 +24,7 @@ library(lattice)
 
 - **data reading**
 ```{r}
-dat <- read.table("Real_data.csv", header=TRUE, sep=";", dec=",")
+dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
 ```
 
