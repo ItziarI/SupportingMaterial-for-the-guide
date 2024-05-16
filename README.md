@@ -26,5 +26,5 @@ Included material is:
  
    Once all files are download, each .Rmd file can be executed/knitted in R and an *html* file with the corresponding results is generated.
    
-   Nevertheless, for the reader that do not want to execute the code and ease the reading of the tutorial, the final html files are also included.
+   Nevertheless, for the reader that do not want to execute the code and to ease the reading of the tutorial, the final html files are also included.
 
