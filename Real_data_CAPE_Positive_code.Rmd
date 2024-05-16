@@ -27,7 +27,7 @@ library(lattice)
 dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
 ```
-
+- **Check that all variables you are interested are read and that there not other variables you do not need**
 - **do not forget to declare the categorical variables as factors**
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
