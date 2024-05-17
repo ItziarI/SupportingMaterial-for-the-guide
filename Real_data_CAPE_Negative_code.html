@@ -367,7 +367,7 @@ Concepción Arenas</strong></li>
 <li><p><strong>In this real data set there are 106 PRS, and a continuous
 Trait (CAPE_Negative), with gender, age, and two Principal Components as
 covariates.</strong></p></li>
-<li><p><strong>data reading</strong></p></li>
+<li><p><strong>Data reading</strong></p></li>
 </ul>
 <pre class="r"><code>dat &lt;- read.table(&quot;Real_data_Negative.csv&quot;, header=TRUE, sep=&quot;\t&quot;, dec=&quot;.&quot;)
 names(dat) #</code></pre>
@@ -404,7 +404,7 @@ names(dat) #</code></pre>
 <li><strong>Check that all variables you are interested in are properly
 read and that there are not other variables you do not
 need</strong></li>
-<li><strong>do not forget to declare the categorical variables as
+<li><strong>Do not forget to declare the categorical variables as
 factors</strong></li>
 </ul>
 <pre class="r"><code>dat$Sex &lt;- as.factor(dat$Sex)</code></pre>
@@ -569,6 +569,9 @@ for the lack of normality, the model we build is given by:</strong></li>
 <li><strong>The results show that PRS.13 is related with the sqrt(Trait)
 in the following way:</strong></li>
 </ul>
+<p><span class="math display">\[\widehat{sqrt(Trait)} = 3.013 -
+0.101\times PRS.13 - 0.142\times Sex + 0.009\times Age + 3.797\times PC1
++ 8.409\times PC2\]</span></p>
 <ul>
 <li><strong>Step 4.1.2: Perform a permutation test to assess the
 association</strong></li>

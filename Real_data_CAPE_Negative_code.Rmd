@@ -151,10 +151,9 @@ summary(FM)
 
 - **The results show that PRS.13 is related with the sqrt(Trait) in the following way:**
 
-\begin{itemize}
-    \item $\widehat{sqrt(Trait)} = 3.013 - 0.101\times PRS.13 - 0.142\times Sex + 0.009\times Age + 3.797\times PC1 + 8.409\times PC2$ 
 
-\end{itemize}
+$$\widehat{sqrt(Trait)} = 3.013 - 0.101\times PRS.13 - 0.142\times Sex + 0.009\times Age + 3.797\times PC1 + 8.409\times PC2$$ 
+
 
 - **Step 4.1.2: Perform a permutation test to assess the association**
 ```{r}
