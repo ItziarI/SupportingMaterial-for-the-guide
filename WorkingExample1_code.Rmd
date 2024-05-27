@@ -2,7 +2,7 @@
 - **Title: Working example 1**
 - **Output: html_document**
 - **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
-- **Authors: Itziar Irigoien, Patricia Mas, Araceli Rosa, and Concepción Arenas**
+- **Authors: Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas**
 
 
 ```{r setup, include=FALSE}
@@ -19,7 +19,7 @@ library(multcomp)
 
 ## Working example 1
 
-### In this example we simulate 9 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates
+- **In this example we simulate 9 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates**
 
 - **data reading**
 ```{r}
@@ -33,14 +33,28 @@ dat$Sex <- as.factor(dat$Sex)
 dat$Diagnostic <- as.factor(dat$Diagnostic)
 ```
 
-- **Step 1: Order  the PRSs**
+## 1.	What full model should be considered?
+
+- **First, given a particular PRS (named PRS.i), consider all the possible full models:**
+- **FMWI : Trait versus PRS.i + Sex + Diagnostic + Age + PC1 + PC2**
+- **FMSex: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + Age + PC1 + PC2**
+- **FMDiagnostic: Trait versus PRS.i + Sex + Diagnostic +    PRS.i  · Diagnostic + Age + PC1 + PC2**
+- **FMSex/Diagnostic: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + PRS.i · Diagnostic + Age + PC1 + PC2**
+
+## 2. How to make a PRS ranking to find the important ones?
+
+- **As is described in the paper, for each model, calculate the coefficient of determination $R^2$ and calculate the sum: $S =  R^2_{WI} +  R^2_{Sex} +  R^2_{Diagnostic} +  R^2_{Sex*Diagnostic}$.** 
+
+- **According to S, list the PRSs in decreasing order:**
+
+- **Order  the PRSs**
 ```{r}
 out <- orderR2(dat, yname="Trait", prsname = "PRS.")
 head(out)
 write.csv2(out,file="WExample1_Ordered_PRS.csv")
 ```
 
-- **Step 1: Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean**
+- **Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean**
 ```{r}
 out <- data.frame(out) 
 nPRS <- dim(out)[1]
@@ -63,35 +77,12 @@ ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
 
 ```
 
-- **Repeat the plot with only de PRS with $S_{R^2}$ larger then the median. Lines: in red and solid the 95% percentile; in red and dashed the 90%, 85%, 80% percentiles**
-```{r}
-sel <- out$Sum > median(out$effect)
-ggplot(data=out[sel,], aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
-  geom_point() +
-  geom_errorbarh(height=.1) +
-  scale_y_continuous(name=NULL, breaks= n:1, labels=row.names(out), position="right") +
-  labs(title='', x='Sum R^2', y = 'PRS') +
-  geom_vline(xintercept=quantile(out$Sum, prob=0.95), color='red', linetype='solid') +
-  geom_vline(xintercept=quantile(out$Sum, prob=c(0.80, 0.85, 0.90)), color='red', linetype='dashed') +
-  theme_minimal()
-```
 
-- **Create files with PRS with the sum of $R^2$ greater then the 95%, 90%, 85% and 80% percentile**
-```{r}
-sel_95 <- out$Sum > quantile(out$Sum, prob=0.95)
-write.csv2(out[sel_95,-9], file="WExample1_precentil_95.csv")
-sel_90 <- out$Sum > quantile(out$Sum, prob=0.90)
-write.csv2(out[sel_90,-9], file="WExample1_precentil_90.csv")
-sel_85 <- out$Sum > quantile(out$Sum, prob=0.85)
-write.csv2(out[sel_85,-9], file="WExample1_precentil_85.csv")
-sel_80 <- out$Sum > quantile(out$Sum, prob=0.80)
-write.csv2(out[sel_80,-9], file="WExample1_precentil_80.csv")
+- **According to the obtained results, first, PRS.4 is selected to analyse its possible association with the Trait.**
 
-```
+## 3. Which model, of all the possible ones, should be used?
 
-### According to the obtained results, first, PRS.4 is selected to analyse its possible association with the Trait
-
-- **Step 2.1: Plots to check the possible interactions**
+- **The following Figure represents the scatter plot of Trait versus PRS.4 separated by Sex and Diagnostic groups.**
 ```{r}
 # First candidate PRS.4
 # Plot it
@@ -101,10 +92,12 @@ ggplot(dat, aes(x=PRS.4, y=Trait)) +
   facet_grid(Sex ~ Diagnostic, labeller=label_both)
 ```
 
-### The plots suggest that the interaction between the PRS.4 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Diagnostic + PC1 +PC2$
+- **Observing the slopes of the lines, it seems that a different relationship between Trait and PRS.4 could be expected depending on the diagnostic group, but not depending on the sex group.Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Diagnostic + PC1 +PC2$.**
 
+## 4.	For a continuous trait, what steps should be followed for a correct analysis?
 
-- **Step2.2: Do parametric assumptions for the selected FM hold?**
+- **4.1.  How is the candidate model validated?**
+- **First, we validate the normality of the errors and the constant variance conditions (see the figures and the results of Shapiro test and Levene test.**
 ```{r}
 #model
 FM <- lm(Trait ~ PRS.4*Diagnostic + Sex + Age + PC1 + PC2, data=dat)
@@ -113,7 +106,7 @@ plot(FM,2)
 ```
 
 ```{r}
-#Saphiro-Wilk test
+#Shapiro-Wilk test
 shapiro.test(FM$residuals)
 ```
 
@@ -129,29 +122,50 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Diagnostic)) + geom_point() + geom_h
 leveneTest(.stdresid ~ Diagnostic, data=d)
 ```
 
-### It seems all assumptions fulfill, therefore, we move to *Step 3*
+-**Having the full model validated, we can use it.**
 
-- **Step 3: Check the coefficients of the model**
+- **4.3	 How a possible association is established?**
 ```{r}
 summary(FM)
 ```
-### The results show that PRS.4 is related with the Trait in the following way:
 
-\begin{itemize}
-    \itemif Diagnostic = 0, $\widehat{Trait} = 14.816 + -1.041\, PRS.4 + 1.3\,Sex -0.071\,Age + 0.927\,PC1 + 8.033\,PC2$ 
-    \item if Diagnostic = 1, $\widehat{Trait}$ = (14.816 -8.321) + (-1.041+15.022)\,PRS.4 + 1.3\,Sex -0.071\,Age + 0.927\,PC1 + 8.033\,PC2 
+-**Next table shows the parameters and hypothesis (columns 1-3), together with the standard output for this type of analysis (columns 4-7). This output allows the model equation to be built and it would be used if the objective of the study is to predict the Trait values.**
+```{=latex}
+\begin{table}[h!]
+\centering
+\begin{tabular}{l|ccrrrr}
+\hline
+              &  Parameter & Null Hypothesis & Estimate & Std. Error & t value & $p$-value\\
+\hline
+Intercept & $b_0$ &  $b_0=0$ & 14.816 & 2.806 &  5.280 & 1.28e-06\\
+PRS.4 & $b_1$ &  $b_1=0$ & -1.041 & 3.710 & -0.280 &  0.780\\
+Diagnostic1 & $b_2$ &  $b_2=0$ & -8.321 & 3.622 & -2.298 &  0.025\\
+Sex1 & $b_3$ &  $b_3=0$ & 1.300 & 0.839 &  1.548 &  0.126\\
+Age & $b_4$ &  $b_4=0$ & -0.071 & 0.086 & -0.819 &  0.416\\
+PC1 & $b_5$ &  $b_5=0$ & 0.927 & 6.455 &  0.144 &  0.886\\ 
+PC2 & $b_6$ &  $b_6=0$ & 8.033 & 6.230 &  1.289 &  0.201\\
+PRS.4:Diagnostic1 & $b_7$ &  $b_7=0$ & 15.026 & 6.690 &  2.246 &  0.028\\
+ \hline
+\end{tabular}
+\caption{\label{tab:Table2}: Working example 1. Parameters, null hypothesis, estimates, standard errors, $t$ statistics, and $p$-values for the regression coefficients in the FM$_{Diagnostic}$.}
+\end{table}
+```
 
-\end{itemize}
+-**The PRS.4 coefficient will vary depending on the diagnostic group each individual belongs to, being:**
 
+  + if Diagnostic = 0, $\widehat{Trait} = 14.816 + -1.041\, PRS.4 + 1.3\,Sex -0.071\,Age + 0.927\,PC1 + 8.033\,PC2$ 
+  + if Diagnostic = 1, $\widehat{Trait} = (14.816 -8.321) + (-1.041+15.022)\,PRS.4 + 1.3\,Sex -0.071\,Age + 0.927\,PC1 + 8.033\,PC2$ 
 
-- **Step 3: Check whether the respective PRS coefficients under each group are significant or not**
+**where Sex takes values 0 or 1, depending on whether the individual under study is male or female, affecting only the value of the intercept.**
+
+-**However, if the objective is to evaluate the possible association between Trait and PRS.4, it can be interesting to check whether the respective PRS.4 coefficients under each Diagnostic group are considerable or not. Note that these coefficients vary according to the Diagnosis group being b1 for the Diagnostic group 0, which has been taken as the basal group; b1 + b7 for the Diagnostic 1**
 ```{r}
 summary(glht(FM, "PRS.4 = 0"))
 summary(glht(FM, "PRS.4  + PRS.4:Diagnostic1 = 0"))
 ```
 
-### That means that for Diagnostic group 0 there is no relevant association (coeff = -1.041), but for Diagnostic group 1, the association is strong, positive (coeff = 13.980), and significant (p-value = 0.014)
+-**That means that for Diagnostic group 0 there is no relevant association (coeff = -1.041), but for Diagnostic group 1, the association is strong, positive (coeff = 13.980), and significant (p-value = 0.014).**
 
 
-- **Last step: We move to the next PRS**
+-**Last step: We move to the next PRS.**
 

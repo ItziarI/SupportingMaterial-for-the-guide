@@ -1,24 +1,27 @@
 # A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples
 
-Supported Information of the tutorial paper *A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples* can be reproduced with the provided material in the repository
+Supported Information of the tutorial paper *A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples* can be reproduced with the provided material in the repository. The generated *html* files have also been included to ease the reading, if wanted.
 
 Included material is: 
  
-**Codes in the examples and corresponding R codes**
+**Examples with given data and R codes**
+
    - Sinthetics: 
    
-       - WExample1.csv and WorkingExample1_code.Rmd
-       - WExample2.csv and WorkingExample2_code.Rmd
-       - WExample3.csv and WorkingExample3_code.Rmd
-       - WExample4.csv and WorkingExample4_code.Rmd
+       - *WExample1.csv* and *WorkingExample1_code.Rmd*
+       - *WExample2.csv* and *WorkingExample2_code.Rmd*
+       - *WExample3.csv* and *WorkingExample3_code.Rmd*
+       - *WExample4.csv* and *WorkingExample4_code.Rmd*
+   
+   \bigskip
    
    - Real data set: 
+       + *Real_data_Negative.csv* with codes in *Real_dataCAPE_Negative_code.Rmd* 
+       + *Real_data_Positive.csv* with codes in  *Real_dataCAPE_Positive_code.Rmd*
+      
+       Data set contains PRSs for psychotic-like experiences (PLE) measured on 227 healthy individuals. PLE are similar psychotic experiences to those experienced by patients with schizophrenia but found in an attenuated form in healthy subjects. PLE are considered to be normally distributed in the general population, with just a few individuals presenting high levels of PLE and thus being the ones at risk of developing psychosis. 
    
-   Data set contains PRSs for psychotic-like experiences (PLE) measured on 227 healthy individuals. PLE are similar psychotic experiences to those experienced by patients with schizophrenia but found in an attenuated form in healthy subjects. PLE are considered to be normally distributed in the general population, with just a few individuals presenting high levels of PLE and thus being the ones at risk of developing psychosis. 
-   
-      - Real_data_Negative.csv with codes in Real_dataCAPE_Negative_code.Rmd 
-      - Real_data_Positive.csv with codes Real_dataCAPE_Positive_code.Rmd
-   
+
    
 
  
