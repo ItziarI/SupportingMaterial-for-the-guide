@@ -1,6 +1,12 @@
+---
+title: "Working example 1"
+output:
+  pdf_document:
+    keep_tex: true
+---
 
 - **Title: Working example 1**
-- **Output: html_document**
+- **Output: pdf_document**
 - **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
 - **Authors: Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas**
 
