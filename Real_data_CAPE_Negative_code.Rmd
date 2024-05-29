@@ -1,7 +1,11 @@
-- **Title: Real data CAPE Negative**
-- **Output: html_document**
-- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
-- **Authors: Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas**
+---
+title: "Real data: CAPE Negative"
+subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+author: "Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas"
+output:
+  pdf_document:
+    keep_tex: true
+---
 
 
 ```{r setup, include=FALSE}
@@ -16,34 +20,38 @@ library(multcomp)
 ```
 
 
-## **Real data CAPE Negative**
+## Working flow and code
 
-**In this real data set there are 106 PRS, and a continuous Trait ($CAPE_{Negative}$), with gender, age, and two Principal Components as covariates. For more details see Section 7 in the paper.**
+In this real data set there are 106 PRS, and a **continuous Trait** ($CAPE_{Negative}$), with gender, age, and two Principal Components as covariates. For more details see Section 7 in the paper.
 
-- **Data reading**
+- Data reading
 ```{r}
 dat <- read.table("Real_data_Negative.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
 dat <- dat[, -1]
 ```
-- **Important! Check that all variables you are interested in are properly read and that there are not other variables you do not need.**
-- **Do not forget to declare the categorical variables as factors.**
+Important! Check that all variables you are interested in are properly read and that there are not other variables you do not need.
+
+\bigskip
+
+- Do not forget to declare the categorical variables as factors.
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
 ```
 
 ## 1.	What full model should be considered?
 
-- **First, given a particular PRS (named PRS.i), consider all the possible full models:**
-- **FMWI : Trait versus PRS.i + Sex + Age + PC1 + PC2**
-- **FMSex: Trait versus PRS.i + Sex + PRS.i · Sex +  Age + PC1 + PC2**
+First, given a particular PRS (named PRS.i), consider all the possible full models:
+
+- FM$_{WI}$ : Trait versus PRS.i + Sex + Age + PC1 + PC2
+- FM$_{Sex}$: Trait versus PRS.i + Sex + PRS.i · Sex +  Age + PC1 + PC2
 
 
 ## 2. How to make a PRS ranking to find the important ones?
 
-- **As is described in the paper, for each model, calculate the coefficient of determination $R^2$ and calculate the sum: $S =  R^2_{WI} +  R^2_{Sex}$.** 
+As is described in the paper, for each model, calculate the coefficient of determination $R^2$ and calculate the sum: $S =  R^2_{WI} +  R^2_{Sex}$. 
 
-- **According to S, list the PRSs in decreasing order:**
+According to S, list the PRSs in decreasing order:
 ```{r}
 out <- orderR2(dat, yname="CAPE_Negative", prsname = "PRS.")
 head(out)
@@ -52,7 +60,7 @@ filename <- paste0(mainfilename, "_Ordered_PRS.csv")
 write.csv2(out,file=filename)
 ```
 
-- **Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean.**
+Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean.
 ```{r}
 out <- data.frame(out) 
 nPRS <- dim(out)[1]
@@ -76,11 +84,11 @@ ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
 ```
 
 
-- **According to the obtained results, first, PRS.13 is selected to analyse its possible association with the $CAPE_{Negative}$.**
+According to the obtained results, first, PRS.13 is selected to analyse its possible association with the $CAPE_{Negative}$.
 
 ## 3. Which model, of all the possible ones, should be used?
 
-- **The following Figure represents the scatter plot of $CAPE_{Negative}$ versus PRS.13 separated by Sex group.**
+The following Figure represents the scatter plot of $CAPE_{Negative}$ versus PRS.13 separated by Sex group.
 ```{r}
 # First candidate PRS.13
 # Plot it
@@ -88,13 +96,13 @@ library(lattice)
 xyplot(CAPE_Negative~PRS.13|Sex, data=dat,  type=c("p", "r"))
 ```
 
-- **The plots suggest that the interaction between the PRS.13 and the sex is not relevant. Thus, we set the full model candidate (FM): $CAPE_{Negative} \sim PRS + Sex + Age + PC1 +PC2$.**
+The plots suggest that the interaction between the PRS.13 and the sex is not relevant. Thus, we set the full model candidate (FM): $CAPE_{Negative} \sim PRS + Sex + Age + PC1 +PC2$.
 
 ## 4.	For a continuous trait, what steps should be followed for a correct analysis?
 
 - **4.1.  How is the candidate model validated?**
 
-- **First, we validate the normality of the errors and the constant variance conditions (see the figures and the results of Shapiro test and Levene test).**
+First, we validate the normality of the errors and the constant variance conditions (see the figures and the results of Shapiro test and Levene test).
 
 ```{r}
 #model
@@ -103,9 +111,9 @@ FM <- lm(CAPE_Negative ~ PRS.13 + Sex + Age + PC1 + PC2, data=dat)
 plot(FM,2)   
 ```
 
-- **The lack of normality of residuals is suggested by this last plot.**
+The lack of normality of residuals is suggested by this last plot.
 
-- **This supported by Shapiro’s test:**
+This supported by Shapiro’s test:
 ```{r}
 #Shapiro-Wilk test
 shapiro.test(FM$residuals)
@@ -123,15 +131,15 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yi
 leveneTest(.stdresid ~ Sex, data=d)
 ```
 
-- **All in all, it seems that there is lack of normality of residuals but linearity and homocedasticity assumptions hold.**
+All in all, it seems that there is lack of normality of residuals but linearity and homocedasticity assumptions hold.
 
 
 - **4.2. What can be done if any validation condition fails?**
 
-- **We have two approaches to assess the possible association with PRS.13 and $CAPE_{Negative}$: try a transformation or perform a permutation test.**
+We have two approaches to assess the possible association with PRS.13 and $CAPE_{Negative}$: try a transformation or perform a permutation test.
 
 
-- **First we try the squared root transformation for the dependent variable:**
+First we try the squared root transformation for the dependent variable:
 ```{r}
 dat$TNegative <- sqrt(dat$CAPE_Negative)
 FM <- lm(TNegative ~ PRS.13 + Sex + Age + PC1 + PC2, data=dat)
@@ -143,11 +151,13 @@ plot(FM,2)
 #Shapiro-Wilk test
 shapiro.test(FM$residuals)
 ```
-- **It is suggested the transformation offered a solution for the lack of normality. Furthermore,**
+It is suggested the transformation offered a solution for the lack of normality. Furthermore,...
 ```{r}
 #plot for variances
 d <- fortify(FM)
-ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yintercept=0, col="red")+
+ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) +
+  geom_point() + 
+  geom_hline(yintercept=0, col="red")+
   facet_wrap(.~Sex)
 ```
 
@@ -156,27 +166,27 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yi
 leveneTest(.stdresid ~ Sex, data=d)
 ```
 
-**results do not indicate evidence against homoscedasticity, neither a pattern is observed that could indicate a lack of linearity.**
+...results do not indicate evidence against homoscedasticity, neither a pattern is observed that could indicate a lack of linearity.
 
-- **Therefore, the model we build is given by:**
+Therefore, the model we build is given by:
 ```{r}
 summary(FM)
 ```
 
-- **The results show that PRS.13 is related with the $\sqrt{Trait}$ in the following way:**
+The results show that PRS.13 is related with the $\sqrt{Trait}$ in the following way:
 
 $$\widehat{\sqrt{Trait}} = 3.013 - 0.101\times PRS.13 - 0.142\times Sex + 0.009\times Age + 3.797\times PC1 + 8.409\times PC2,$$ 
-**where Sex takes values 0 or 1, depending on whether the individual under study is male or female. See section 7.1 in the paper for more details.**
+where Sex takes values 0 or 1, depending on whether the individual under study is male or female. See section 7.1 in the paper for more details.
 
 
-- **On the other hand, based on the permutation approach:**
+On the other hand, based on the permutation approach:
 ```{r}
 NM <- lm(CAPE_Negative ~  Sex + Age + PC1 + PC2, data=dat)
 FM <- lm(CAPE_Negative ~ PRS.13 + Sex + Age + PC1 + PC2, data=dat)
 outperm <- dR2(NullModel=NM, FullModel=FM, B=5000, seed=165)
 outperm
 ```
-- **We observe an increase of 0.0196 in the coefficient of determination when the PRS.13 is included in the model and the permutation test indicates it is significant.**
+We observe an increase of 0.0196 in the coefficient of determination when the PRS.13 is included in the model and the permutation test indicates it is significant.
 
 
 - **Last step: We move to the next PRS.**

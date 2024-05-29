@@ -1,7 +1,11 @@
-- **Title: Real data CAPE Positive**
-- **Output: html_document**
-- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
-- **Authors: Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas**
+---
+title: " Real data: CAPE Positive"
+subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+author: "Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas"
+output:
+  pdf_document:
+    keep_tex: true
+---
 
 
 ```{r setup, include=FALSE}
@@ -17,19 +21,21 @@ library(lattice)
 ```
 
 
-## Real data CAPE Positive as binary Trait
+## Working flow and code
 
-- **In this real data set there are 106 PRS, and a binary Trait ($CAPE_{Positive}$), with gender, age, and two Principal Components as covariates.** 
+In this real data set there are 106 PRS, and a **binary Trait** ($CAPE_{Positive}$), with gender, age, and two Principal Components as covariates. 
 
-- **Data reading**
+- Data reading
 ```{r}
 dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".")
 names(dat) #
 dat <- dat[, -1]
 ```
-- **Check that all variables you are interested in are properly read and that there are not other variables you do not need.**
+Check that all variables you are interested in are properly read and that there are not other variables you do not need.
 
-- **Do not forget to declare the categorical variables as factors**
+\bigskip
+
+- Do not forget to declare the categorical variables as factors
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
 dat$CAPE_Positive <- as.factor(dat$CAPE_Positive)
@@ -37,16 +43,17 @@ dat$CAPE_Positive <- as.factor(dat$CAPE_Positive)
 
 ## 1.	What full model should be considered?
 
-- **First, given a particular PRS (named PRS.i), consider all the possible full models:**
-- **FMW I : log(p/1-p) versus PRS.i + Sex + Age + PC1 + PC2**
-- **FMSex: log(p/1-p) versus PRS.i + Sex + PRS.i\,Sex + Age + PC1 + PC2**
+First, given a particular PRS (named PRS.i), consider all the possible full models:
+
+- FM$_{WI}$ : log(p/1-p) versus PRS.i + Sex + Age + PC1 + PC2
+- FM$_{Sex}$: log(p/1-p) versus PRS.i + Sex + PRS.i\,Sex + Age + PC1 + PC2
 
 
 ## 2. How to make a PRS ranking to find the important ones?
 
-- **As is described in the paper, for each model, calculate the Tjur's coefficients of discrimination. If Nagelkerke's $R^2$ is prefered, set statistic="PseudoR2" in function orderBin(), and calculate their sum $S$.** 
+As is described in the paper, for each model, calculate the Tjur's coefficients of discrimination. If Nagelkerke's $R^2$ is prefered, set statistic="PseudoR2" in function orderBin(), and calculate their sum $S$. 
 
-- **According to S, list the PRSs in decreasing order:**
+According to S, list the PRSs in decreasing order:
 ```{r}
 # Order the PRSs
 out <- orderBin(dat, yname="CAPE_Positive", prsname = "PRS.", statistic = "D")
@@ -56,7 +63,7 @@ filename <- paste0(mainfilename, "_Ordered_PRS.csv")
 write.csv2(out,file=filename)
 ```
 
-- **Plot the sum of discrimination coefficients  $D$. Lines: in blue the median; in black the mean.**
+Plot the sum of discrimination coefficients  $D$. Lines: in blue the median; in black the mean.
 ```{r}
 out <- data.frame(out) 
 n <- dim(out)[1]
@@ -79,11 +86,11 @@ ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
 
 ```
 
-- **According to the obtained results, first PRS.15 is selected to analyse its association with the $CAPE_{Positive}$.**
+According to the obtained results, first PRS.15 is selected to analyse its association with the $CAPE_{Positive}$.
 
 ### 3. Which model, of all the possible ones, should be used?
 
-- **The following Figure represents the scatter plot separated by Sex group.**
+The following Figure represents the scatter plot separated by Sex group.
 ```{r}
 # First candidate PRS.15
 # Plot it
@@ -92,11 +99,11 @@ pre <- M$fitted.values #predict(M,type='response')
 xyplot(log(pre/(pre+1))~PRS.15|Sex, data=dat,  type=c("p", "r"))
 ```
 
-- **The plots suggest that the interaction between the PRS.15 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $CAPE_{Positive} \sim PRS + Sex  + PRS\cdot Sex + Age + PC1 +PC2$**
+The plots suggest that the interaction between the PRS.15 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $CAPE_{Positive} \sim PRS + Sex  + PRS\cdot Sex + Age + PC1 +PC2$
 
 ### 5.	For a binary trait, what steps should be followed for a correct analysis?
 
-- **Check for overdispersion**
+Check for overdispersion
 ```{r}
 #model
 FM <- glm(CAPE_Positive ~ Sex + PRS.15*Sex + Age + PC1 + PC2, data=dat, family=binomial())
@@ -107,7 +114,7 @@ FM$deviance/FM$df.residual
 
 ```
 
-- **Since this ratio is close to 1, there is not evidence of overdispersion.**
+Since this ratio is close to 1, there is not evidence of overdispersion.
 
 ```{r}
 #With chi-squared test
@@ -116,37 +123,37 @@ pchisq(summary(FM.od)$dispersion * FM$df.residual,
        FM$df.residual, lower = F)
 ```
 
-- **With this p-value = 0.2651 we conclude that there is not evedence of overdispersion.**
+With this p-value = 0.2651 we conclude that there is not evedence of overdispersion.
 
-- **Based on the estimations given in this table:**
+Based on the estimations given in this table:
 ```{r}
 summary(FM)
 ```
 
-- **The PRS.15 coefficient will vary depending on the gender, being:**
+The PRS.15 coefficient will vary depending on the gender, being:
 
   - $\widehat{log(p/1-p)} = 0.055 + 0.746\times PRS.15 - 0.118\times Age + 1.951\times PC1 + 2.867\times PC2$, if Sex = 0.
   - $\widehat{log(p/1-p)} = (0.055 + 0.139) + (0.746 - 0.749)\times PRS.15 - 0.118\times Age + 1.951\times PC1 + 2.867\times PC2$, if Sex = 1.
 
 
 
-- **Check whether the respective PRS coefficients under each group are significant or not.**
+Check whether the respective PRS coefficients under each group are significant or not.
 ```{r}
 summary(glht(FM, "PRS.15 = 0"))
 summary(glht(FM, "PRS.15  + Sex1:PRS.15 = 0"))
 ```
 
-- **That means that for those with Sex=1, it seems that the PRS.15 is not related to the Trait with odds = exp(-0.002) = 0.991, but for those with Sex = 0 the model indicates that the coefficient of PRS.15 is 0.7463, so the odds increase exp(0.7463) = 2.109 for an incremental of one unit in PRS.15 with a p-value=0.0101.**
+That means that for those with Sex=1, it seems that the PRS.15 is not related to the Trait with odds = exp(-0.002) = 0.991, but for those with Sex = 0 the model indicates that the coefficient of PRS.15 is 0.7463, so the odds increase exp(0.7463) = 2.109 for an incremental of one unit in PRS.15 with a p-value=0.0101.
 
 
-- **It is possible to compute a permutation test to assess whether the increase in the coefficient of determination $D$ is significative.**
+It is possible to compute a permutation test to assess whether the increase in the coefficient of determination $D$ is significative.
 ```{r}
 # Null model
 NM <- glm(CAPE_Positive ~  Sex + Age + PC1 + PC2, data=dat, family=binomial() )
 permtest <- dD(NM, FM, seed=1236)
 permtest
 ```
-- **In this particular case, it can be seen that the coefficient of discrimination of the FM model is 0.05 units bigger than the corresponding to the *Null Model* NM, and it is statistically significant.**
+In this particular case, it can be seen that the coefficient of discrimination of the FM model is 0.05 units bigger than the corresponding to the *Null Model* NM, and it is statistically significant.
 
 - **Last step: We move to the next PRS.**
 

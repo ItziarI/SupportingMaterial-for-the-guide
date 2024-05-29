@@ -1,7 +1,11 @@
-- **Title: Working example 3**
-- **Output: html_document**
-- **Reference: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples**
-- **Authors:  Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas**
+---
+title: "WORKING EXAMPLE 3"
+subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+author: "Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas"
+output:
+  pdf_document:
+    keep_tex: true
+---
 
 
 ```{r setup, include=FALSE}
@@ -16,17 +20,19 @@ library(MASS)
 ```
 
 
-## Working example 3
+## Working flow and code
 
-**In this example we simulate 5 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates.**
+In this example we simulate 5 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates.
 
-- **data reading**
+- data reading
 ```{r}
 dat <- read.table("WExample3.csv", header=TRUE, sep=";", dec=",")
 names(dat) #
 ```
 
-- **do not forget to declare the categorical variables as factors**
+\bigskip
+
+- do not forget to declare the categorical variables as factors
 ```{r}
 dat$Sex <- as.factor(dat$Sex)
 dat$Diagnostic <- as.factor(dat$Diagnostic)
@@ -34,24 +40,25 @@ dat$Diagnostic <- as.factor(dat$Diagnostic)
 
 ## 1.	What full model should be considered?
 
-- **First, given a particular PRS (named PRS.i), consider all the possible full models:**
-- **FMW I : Trait versus PRS.i + Sex + Diagnostic + Age + PC1 + PC2**
-- **FMSex: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + Age + PC1 + PC2**
-- **FMDiagnostic: Trait versus PRS.i + Sex + Diagnostic +    PRS.i  · Diagnostic + Age + PC1 + PC2**
-- **FMSex/Diagnostic: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + PRS.i · Diagnostic + Age + PC1 + PC2**
+First, given a particular PRS (named PRS.i), consider all the possible full models:
+
+- FM$_{WI}$ : Trait versus PRS.i + Sex + Diagnostic + Age + PC1 + PC2
+- FM$_{Sex}$: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + Age + PC1 + PC2
+- FM$_{Diagnostic}$: Trait versus PRS.i + Sex + Diagnostic +    PRS.i  · Diagnostic + Age + PC1 + PC2
+- FM${Sex/Diagnostic}$: Trait versus PRS.i + Sex + PRS.i · Sex + Diagnostic + PRS.i · Diagnostic + Age + PC1 + PC2
 
 ## 2. How to make a PRS ranking to find the important ones?
 
-- **As is described in the paper, for each model, calculate the coefficient of determination $R^2$ and calculate the sum: $S =  R^2_{WI} +  R^2_{Sex} +  R^2_{Diagnostic} +  R^2_{Sex \cdot Diagnostic}$.** 
+As is described in the paper, for each model, calculate the coefficient of determination $R^2$ and calculate the sum: $S =  R^2_{WI} +  R^2_{Sex} +  R^2_{Diagnostic} +  R^2_{Sex \cdot Diagnostic}$. 
 
-- **According to S, list the PRSs in decreasing order:**
+According to S, list the PRSs in decreasing order:
 ```{r}
 out <- orderR2(dat, yname="Trait", prsname = "PRS.")
 head(out)
 write.csv2(out,file="WExample1_Ordered_PRS.csv")
 ```
 
-- **Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean.**
+Plot the sum of coefficients of determination $S_{R^2}$. Lines: in blue the median; in black the mean.
 ```{r}
 out <- data.frame(out) 
 nPRS <- dim(out)[1]
@@ -74,11 +81,11 @@ ggplot(data=out, aes(y=rank, x=effect, xmin=lower, xmax=upper)) +
 
 ```
 
-- **According to the obtained results, first PRS.1 is selected to analyze its association with the Trait.**
+According to the obtained results, first PRS.1 is selected to analyze its association with the Trait.
 
 ## 3. Which model, of all the possible ones, should be used?
 
-- **The following figure represents the scatter plot of Trait versus PRS.1 separated by Sex and Diagnostic groups.**
+The following figure represents the scatter plot of Trait versus PRS.1 separated by Sex and Diagnostic groups.
 ```{r}
 ggplot(dat, aes(x=PRS.1, y=Trait)) +
   geom_point() +
@@ -86,13 +93,13 @@ ggplot(dat, aes(x=PRS.1, y=Trait)) +
   facet_grid(Sex ~ Diagnostic, labeller=label_both)
 ```
 
-- **The plots suggest that the interaction between the PRS.1 and sex is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Sex + PC1 +PC2$.**
+The plots suggest that the interaction between the PRS.1 and sex is relevant. Thus, we set the full model candidate (FM): $Trait \sim PRS + Sex + Diagnostic + PRS\cdot Sex + PC1 +PC2$.
 
 ### 4.	For a continuous trait, what steps should be followed for a correct analysis?
 
 - **4.1.  How is the candidate model validated?**
 
-- **First, we validate the normality of the errors and the constant variance conditions (see the figures and the results of Shapiro test and Levene test).**
+First, we validate the normality of the errors and the constant variance conditions (see the figures and the results of Shapiro test and Levene test).
 ```{r}
 #model
 FM <- lm(Trait ~ PRS.1*Sex + Diagnostic + Age + PC1 + PC2, data=dat)
@@ -108,7 +115,9 @@ shapiro.test(FM$residuals)
 ```{r}
 #plot for variances
 d <- fortify(FM)
-ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yintercept=0, col="red")+
+ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + 
+  geom_point() + 
+  geom_hline(yintercept=0, col="red")+
   facet_wrap(.~Sex)
 ```
 
@@ -117,14 +126,14 @@ ggplot(d,aes(x=.fitted, y=.stdresid, colour=Sex)) + geom_point() + geom_hline(yi
 leveneTest(.stdresid ~ Sex, data=d)
 ```
 
-- **It seems that homocedasticity does not hold.**
+It seems that homocedasticity does not hold.
 
 - **4.2. What can be done if any validation condition fails?**
 
-- **We have two approaches to assess the possible association with PRS.1 and the Trait: try a Box-Cox transformation  or perform a weighted permutation test.**
+We have two approaches to assess the possible association with PRS.1 and the Trait: try a Box-Cox transformation  or perform a weighted permutation test.
 
-- **First, we try a Box-Cox transformation of the dependent variable:**
-  - **Determine the lambda value.**
+First, we try a Box-Cox transformation of the dependent variable:
+  - Determine the lambda value.
 ```{r}
 b <- boxcox(FM)
 ```
@@ -133,13 +142,13 @@ b <- boxcox(FM)
 lambda <- b$x[which.max(b$y)]
 lambda
 ```
- - **Transform the dependent variable and establish the new model.**
+ - Transform the dependent variable and establish the new model.
 ```{r}
 dat$newTrait <- (dat$Trait ^ lambda - 1) / lambda
 FM <- lm(newTrait ~ PRS.1*Sex + Diagnostic + Age + PC1 + PC2, data=dat)
 ```
 
-- **Check the normality and homocedasticity conditions.**
+- Check the normality and homocedasticity conditions.
 ```{r}
 #Shapiro-Wilk test
 shapiro.test(FM$residuals)
@@ -151,7 +160,7 @@ d <- fortify(FM)
 leveneTest(.stdresid ~ Sex, data=d)
 ```
 
-- **In this case, the suggested Box-Cox transformation with $\lambda = 0.667$ does not solve the heteroscedasticity problem. For this reason we perform a weighted-permutation test.** 
+In this case, the suggested Box-Cox transformation with $\lambda = 0.667$ does not solve the heteroscedasticity problem. For this reason we perform a weighted-permutation test. 
 
 
 ```{r}
@@ -161,7 +170,7 @@ outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165,  weights=TRUE)
 outperm
 ```
 
-- **We observe an increase of 0.092 in the coefficient of determination when the PRS.1 is included in the model and the permutation test indicates it is significant.**
+We observe an increase of 0.092 in the coefficient of determination when the PRS.1 is included in the model and the permutation test indicates it is significant.
 
 
 

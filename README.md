@@ -2,7 +2,7 @@
 
 Supported Information of the tutorial paper *A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples* can be reproduced with the provided material in the repository. 
 
-Examples of different complexity are also included to better understand the underlying steps and procedure. In all cases, the raw data and the R code are available so that the reader can reproduce its own output. Nevertheless, the generated *html* files have also been included to ease the reading, if wanted.
+Examples of different complexity are also included to better understand the underlying steps and procedure. In all cases, the raw data and the R code are available so that the reader can reproduce its own output. Nevertheless, the generated *pdf* files have also been included to ease the reading, if wanted.
 
 
  
@@ -28,7 +28,7 @@ Examples of different complexity are also included to better understand the unde
  
  **To run the examples**
  
-   Once all files are download, each .Rmd file can be executed/knitted in R and an *html* file with the corresponding results is generated.
+   Once all files are download, each .Rmd file can be executed/knitted in R and an *pdf* file with the corresponding results is generated.
    
    Nevertheless, for the reader that do not want to execute the code and to ease the reading of the tutorial, the final html files are also included.
 
