@@ -28,7 +28,7 @@ Examples of different complexity are also included to better understand the unde
  
  **To run the examples**
  
-   Once all files are download, each .Rmd file can be executed/knitted in R and an *pdf* file with the corresponding results is generated.
+   Once all files are download, each .Rmd file can be executed/knitted in R and a *pdf* file with the corresponding results is generated.
    
-   Nevertheless, for the reader that do not want to execute the code and to ease the reading of the tutorial, the final html files are also included.
+   Nevertheless, for the reader that do not want to execute the code and to ease the reading of the tutorial, the final pdf files are also included.
 

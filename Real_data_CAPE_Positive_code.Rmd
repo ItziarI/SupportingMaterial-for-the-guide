@@ -1,7 +1,9 @@
 ---
 title: " Real data: CAPE Positive"
 subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
-author: "Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas"
+author: 
+  - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
+  - "Araceli Rosa, and Concepción Arenas"
 output:
   pdf_document:
     keep_tex: true
@@ -27,11 +29,10 @@ In this real data set there are 106 PRS, and a **binary Trait** ($CAPE_{Positive
 
 - Data reading
 ```{r}
-dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".")
+dat <- read.table("Real_data_Positive.csv", header=TRUE, sep="\t", dec=".", row.names=1)
 names(dat) #
-dat <- dat[, -1]
 ```
-Check that all variables you are interested in are properly read and that there are not other variables you do not need.
+Check that all variables you are interested in are properly read and that there are not other variables you do not need as it is the case.
 
 \bigskip
 

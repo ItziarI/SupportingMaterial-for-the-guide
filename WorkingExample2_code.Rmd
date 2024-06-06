@@ -1,7 +1,9 @@
 ---
 title: "WORKING EXAMPLE 2"
 subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
-author: "Itziar Irigoien, Patricia Mas, Sergi Papiol, Neus Barrantes-Vidal, Araceli Rosa, and Concepción Arenas"
+author: 
+  - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
+  - "Araceli Rosa, and Concepción Arenas"
 output:
   pdf_document:
     keep_tex: true
@@ -21,7 +23,7 @@ library(multcomp)
 
 ## Working flow and code
 
-In this example we simulate 10 PRSs, and a continuous trait, with gender, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates.
+In this example we simulate 10 PRSs, and a continuous trait, with sex, clinical diagnosis (with 2 categories), age, and two Principal Components as covariates.
 
 - data reading
 ```{r}
