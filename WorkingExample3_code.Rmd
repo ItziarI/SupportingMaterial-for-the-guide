@@ -1,6 +1,6 @@
 ---
 title: "WORKING EXAMPLE 3"
-subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+subtitle:  "In: Association Analysis Between Polygenic Risk Scores and Traits: Practical Guidelines and Tutorial with an Illustrative Data Set of Schizophrenia"
 author:  
   - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
   - "Araceli Rosa, and Concepción Arenas"
@@ -55,7 +55,8 @@ As is described in the paper, for each model, calculate the coefficient of deter
 
 According to S, list the PRSs in decreasing order:
 ```{r}
-out <- orderR2(dat, yname="Trait", prsname = "PRS.")
+out <- orderR2(dat, yname="Trait", prsname = "PRS.")  # Note that this function 
+# is included in the customized file via source("Functions.R") 
 head(out)
 write.csv2(out,file="WExample1_Ordered_PRS.csv")
 ```
@@ -168,7 +169,8 @@ In this case, the suggested Box-Cox transformation with $\lambda = 0.667$ does n
 ```{r}
 NM <- lm(Trait ~ Sex + Diagnostic + Age + PC1+PC2, data=dat)
 FM <- lm(Trait ~ PRS.1*Sex + Diagnostic + Age + PC1+PC2, data=dat)
-outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165,  weights=TRUE)
+outperm <- dR2(NullModel=NM, FullModel=FM, B=1000, seed=165,  weights=TRUE)  # Note that 
+# this function is included in the customized file via source("Functions.R") 
 outperm
 ```
 

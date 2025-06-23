@@ -1,6 +1,6 @@
 ---
 title: " Real data: CAPE Positive"
-subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+subtitle:  "In: Association Analysis Between Polygenic Risk Scores and Traits: Practical Guidelines and Tutorial with an Illustrative Data Set of Schizophrenia"
 author: 
   - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
   - "Araceli Rosa, and Concepción Arenas"
@@ -57,7 +57,8 @@ As is described in the paper, for each model, calculate the Tjur's coefficients 
 According to S, list the PRSs in decreasing order:
 ```{r}
 # Order the PRSs
-out <- orderBin(dat, yname="CAPE_Positive", prsname = "PRS.", statistic = "D")
+out <- orderBin(dat, yname="CAPE_Positive", prsname = "PRS.", statistic = "D") # Note that this function 
+# is included in the customized file via source("Functions.R") 
 head(out)
 mainfilename <- "Real_data_CAPE_Positive"
 filename <- paste0(mainfilename, "_Ordered_PRS.csv")

@@ -1,6 +1,6 @@
 ---
 title: "Real data: CAPE Negative"
-subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+subtitle:  "In: Association Analysis Between Polygenic Risk Scores and Traits: Practical Guidelines and Tutorial with an Illustrative Data Set of Schizophrenia"
 author: 
   - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
   - "Araceli Rosa, and Concepción Arenas"
@@ -55,7 +55,8 @@ As is described in the paper, for each model, calculate the coefficient of deter
 
 According to S, list the PRSs in decreasing order:
 ```{r}
-out <- orderR2(dat, yname="CAPE_Negative", prsname = "PRS.")
+out <- orderR2(dat, yname="CAPE_Negative", prsname = "PRS.") # Note that this function 
+# is included in the customized file via source("Functions.R") 
 head(out)
 mainfilename <- "Real_example_CAPE_Negative"
 filename <- paste0(mainfilename, "_Ordered_PRS.csv")
@@ -180,7 +181,7 @@ summary(FM)
 The results show that PRS.13 is related with the $\sqrt{Trait}$ in the following way:
 
 $$\widehat{\sqrt{Trait}} = 3.013 - 0.101\times PRS.13 - 0.142\times Sex + 0.009\times Age + 3.797\times PC1 + 8.409\times PC2,$$ 
-where Sex takes values 0 or 1, depending on whether the individual under study is male or female. See section 7.1 in the paper for more details.
+where Sex takes values 0 or 1, depending on whether the individual under study is male or female. See section 8.1 in the paper for more details.
 
 
 On the other hand, based on the permutation approach:

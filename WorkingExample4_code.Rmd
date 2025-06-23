@@ -1,6 +1,6 @@
 ---
 title: "WORKING EXAMPLE 4"
-subtitle:  "In: A guide to test association between Polygenic Risk Scores and psychological and psychiatric traits: practical examples"
+subtitle:  "In: Association Analysis Between Polygenic Risk Scores and Traits: Practical Guidelines and Tutorial with an Illustrative Data Set of Schizophrenia"
 author: 
   - "Itziar Irigoien, Patricia Mas-Bermejo, Sergi Papiol, Neus Barrantes-Vidal,"
   - "Araceli Rosa, and Concepción Arenas"
@@ -58,7 +58,8 @@ As is described in the paper, for each model, calculate the Tjur's coefficients 
 According to S, list the PRSs in decreasing order:
 ```{r}
 # Order the PRSs
-out <- orderBin(dat, yname="Trait", prsname = "PRS.", statistic = "D")
+out <- orderBin(dat, yname="Trait", prsname = "PRS.", statistic = "D") # Note that  
+# this function is included in the customized file via source("Functions.R") 
 head(out)
 mainfilename <- "WExample4"
 filename <- paste0(mainfilename, "_Ordered_PRS.csv")
@@ -105,7 +106,7 @@ ggplot(dat, aes(x=PRS.7, y=log(pre/(pre+1)))) +
 # Candidate FM Trait ~ PRS + Sex + Diagnostic + PRS*Diagnostic + C1 +C2
 ```
 
-The plots suggest that the interaction between the PRS.7 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $log(p/1-p) \sim PRS + Sex + Diagnostic + PRS \cdot Diagnostic + Age + PC1 +PC2$.
+The plots suggest that the interaction between the PRS.7 and the diagnostic is relevant. Thus, we set the full model candidate (FM): $\log(p/1-p) \sim PRS + Sex + Diagnostic + PRS \cdot Diagnostic + Age + PC1 +PC2$.
 
 ### 5.	For a binary trait, what steps should be followed for a correct analysis?
 
@@ -136,11 +137,11 @@ Based on the following table...
 summary(FM)
 ```
 
-...the results show that PRS.7 is related with the log(p/1-p) in the following way:
+...the results show that PRS.7 is related with the $\log(p/1-p)$ in the following way:
 
-  - $\widehat{log(p/1-p)} = 1.953 + 0.008\times PRS.7 + 0.446\times Sex + 0.044\times Age - 5.566\times PC1 + 3.785\times PC2$, if Diagnostic = 0.
+  - $\widehat{\log(p/1-p)} = 1.953 + 0.008\times PRS.7 + 0.446\times Sex + 0.044\times Age - 5.566\times PC1 + 3.785\times PC2$, if Diagnostic = 0.
   
-  - $\widehat{log(p/1-p)} = (1.953+16.714) + (0.008+0.162)\times PRS.7 + 0.446\times Sex + 0.044\times Age - 5.566\times PC1 + 3.785\times PC2$, if Diagnostic = 1.
+  - $\widehat{\log(p/1-p)} = (1.953+16.714) + (0.008+0.162)\times PRS.7 + 0.446\times Sex + 0.044\times Age - 5.566\times PC1 + 3.785\times PC2$, if Diagnostic = 1.
 
 
 Check whether the respective PRS coefficients under each group are significant or not.
