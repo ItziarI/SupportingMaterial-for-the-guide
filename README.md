@@ -8,7 +8,7 @@ Examples of different complexity are also included to better understand the unde
  
 **Included examples with given data and R codes**
 
-   - Sinthetics: 
+   - Synthetics: 
    
        - *WExample1.csv* and *WorkingExample1_code.Rmd*: 
           Example with continuous trait, and model fulfilling linearity, normality and constant variance assumptions.
